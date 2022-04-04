@@ -29,31 +29,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin {
-  late Animation<RelativeRect> _animation;
   late AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     _animationController =
-        AnimationController(duration: Duration(seconds: 2), vsync: this);
-
-    final _curves =
-        CurvedAnimation(parent: _animationController, curve: Curves.linear);
-
-    _animation = RelativeRectTween(
-            end: RelativeRect.fromLTRB(200.0, 200.0, 200.0, 200.0),
-            begin: RelativeRect.fromLTRB(20.0, 20.0, 20.0, 20.0))
-        .animate(_curves)
-      ..addStatusListener((status) {
-        if (status == AnimationStatus.completed) {
-          _animationController.reverse();
-        } else if (status == AnimationStatus.dismissed) {
-          _animationController.forward();
-        }
-      });
-
-    _animationController.forward();
+        AnimationController(duration: const Duration(seconds: 2), vsync: this)
+          ..repeat();
   }
 
   @override
@@ -63,15 +46,8 @@ class _MyHomePageState extends State<MyHomePage>
         title: Text('Animation Controller'),
       ),
       body: Center(
-        child: Stack(children: [
-          PositionedTransition(
-              rect: _animation,
-              child: const Image(
-                height: 300.0,
-                width: 300.0,
-                image: AssetImage('assets/galaxy.png'),
-              )),
-        ]),
+        child: Stack(
+            children: [LightTransitioned(animation: _animationController)]),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -83,6 +59,33 @@ class _MyHomePageState extends State<MyHomePage>
         },
         child: Text('Pause'),
       ),
+    );
+  }
+}
+
+class LightTransitioned extends AnimatedWidget {
+  final AnimationController animation;
+  const LightTransitioned({required this.animation})
+      : super(listenable: animation);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+          gradient: LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: [
+          0,
+          animation.value,
+        ],
+        colors: const [
+          Colors.yellow,
+          Colors.transparent,
+        ],
+      )),
+      height: 400,
+      width: 400,
     );
   }
 }
